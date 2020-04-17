@@ -19,12 +19,19 @@ def connectDB(dotenv_dict):
         ) as server:
             server.start()
             conn = pg.connect(
+                host=dotenv_dict["DB_HOST"],
                 dbname=dotenv_dict["DB_NAME"],
                 user=dotenv_dict["DB_USER_NAME"],
-                host=dotenv_dict["DB_HOST"],
                 password=dotenv_dict["DB_PASSWORD"],
                 port=server.local_bind_port,
             )
+
+            c = conn.cursor()
+            c.execute("select * from lobby_refactored.information_schema.tables")
+            rows = c.fetchall()
+            for r in rows:
+                print(r)
+
     except ConnectionError:
         print("failed")
 
