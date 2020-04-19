@@ -7,30 +7,23 @@ import psycopg2
 
 def connectDB(dotenv_dict):
     import psycopg2 as pg
-
     # connect to db
     try:
-        with SSHTunnelForwarder(
-            (dotenv_dict["HOST"], 22),
-            ssh_username=dotenv_dict["SSH_USER_NAME"],
-            ssh_password=dotenv_dict["SSH_PASSWORD"],
-            remote_bind_address=(dotenv_dict["DB_HOST"], 5432),
-            logger=create_logger(loglevel=1),
-        ) as server:
-            server.start()
-            conn = pg.connect(
-                host=dotenv_dict["DB_HOST"],
-                dbname=dotenv_dict["DB_NAME"],
-                user=dotenv_dict["DB_USER_NAME"],
-                password=dotenv_dict["DB_PASSWORD"],
-                port=server.local_bind_port,
-            )
+        # this connection available after establish:
+        #   ssh -L 65432:localhost:[postgres-port] lobby-dev@[mit-network-ip]
+        conn = pg.connect(
+            host="localhost",
+            dbname=dotenv_dict["DB_NAME"],
+            user=dotenv_dict["DB_USER_NAME"],
+            password=dotenv_dict["DB_PASSWORD"],
+            port='65432',
+        )
 
-            c = conn.cursor()
-            c.execute("select * from lobby_refactored.information_schema.tables")
-            rows = c.fetchall()
-            for r in rows:
-                print(r)
+        c = conn.cursor()
+        c.execute("select * from lobby_refactored.information_schema.tables")
+        rows = c.fetchall()
+        for r in rows:
+            print(r)
 
     except ConnectionError:
         print("failed")
